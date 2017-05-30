@@ -2,9 +2,6 @@
 #include <WiFiUdp.h>
 #include <Servo.h>
 
-/*
-   Programa per rebre de l'Script de Jenkins l'estat de la Build.
-*/
 int incomingByte = 0;
 int jenkins_count = 1;
 int tomcat_count = 1;
