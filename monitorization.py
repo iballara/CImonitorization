@@ -33,17 +33,20 @@ import requests
 
 # Configurations
 ping_server = 1
-ping_when_not_success = 30
+ping_when_not_success = 5
 NAME = 0
 BUILD = 1
 UDP_IP = "192.168.2.23" # Address of NodeMcu
+UDP_IP_FRONT = "192.168.2.26"
+UDP_IP_MOBILE = "192.168.2.27"
+UDP_IP_QA="192.168.2.28"
 UDP_PORT = 2390 # Port of NodeMcu (arbitrary)
 sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) 
 # Jobs to be monitored.
 jobs = ["engine_api_ci_devel", "user_api_ci_devel", "engine_db_clean_devel", "engine_php_sdk_ci", "peacemaker_ci", "bff_ci_devel", "bfa_ci_devel"]
 
 # Arduino Configuration
-SUCCESS = 'b'
+SUCCESS = 'b' 
 FAILURE = 'r'
 BUILDING = 'a'
 UNSTABLE = 'y'
@@ -101,6 +104,16 @@ def check_devel_tomcat():
     else:
         return TOMCAT_NO_OK
 
+def send_data(data_to_send):
+    try:
+        sock.sendto(data_to_send, (UDP_IP, UDP_PORT))
+        sock.sendto(data_to_send, (UDP_IP_FRONT, UDP_PORT))
+        #sock.sendto(data_to_send, (UDP_IP_MOBILE, UDP_PORT))
+        sock.sendto(data_to_send, (UDP_IP_QA, UDP_PORT))
+    except socket.error, v:
+        if v[0] == 65 or v[0] == 64:
+            print "No route found"
+
 # MAIN
 while(1):
 
@@ -116,7 +129,7 @@ while(1):
             data_to_send = job_status[BUILD] + "-" + tomcat_status
             print "data_to_send: " + data_to_send
             # We send the data. Typical: 'b-1'
-            sock.sendto(data_to_send, (UDP_IP, UDP_PORT))
+            send_data(data_to_send)
             # We wait for some seconds before relaunching the request.
             time.sleep(ping_when_not_success)
             # We check the status of the job.
@@ -126,6 +139,6 @@ while(1):
         print "Tomcat Status: " + tomcat_status
         data_to_send = job_status[BUILD] + "-" + tomcat_status
         print "data_to_send: " + data_to_send
-        sock.sendto(data_to_send, (UDP_IP, UDP_PORT))
+        send_data(data_to_send)
         time.sleep(ping_server)
     
