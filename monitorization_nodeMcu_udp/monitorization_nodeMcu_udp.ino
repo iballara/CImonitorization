@@ -25,7 +25,7 @@ const int led_green2 = 13;
 const int tomcat_led_green = 0;
 const int tomcat_led_red = 4;
 const int servo_pin = 5;
-Servo servo;
+//Servo servo;
 
 void setup() {
   pinMode(led_red, OUTPUT);
